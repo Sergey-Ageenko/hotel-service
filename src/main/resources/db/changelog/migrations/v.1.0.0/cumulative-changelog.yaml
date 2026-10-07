@@ -1,3 +1,11 @@
 databaseChangeLog:
   - include:
+      file: db/changelog/migrations/v.1.0.0/createAddress.yaml
+  - include:
+      file: db/changelog/migrations/v.1.0.0/createContacts.yaml
+  - include:
+      file: db/changelog/migrations/v.1.0.0/createArrivalTimes.yaml
+  - include:
       file: db/changelog/migrations/v.1.0.0/createHotels.yaml
+  - include:
+      file: db/changelog/migrations/v.1.0.0/createAmenities.yaml

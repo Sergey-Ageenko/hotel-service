@@ -2,7 +2,6 @@ databaseChangeLog:
   - changeSet:
       id: 1
       author: "Ceageenk2@gmail.com"
-      comment: Hotel table
       changes:
         - createTable:
             tableName: hotels
@@ -13,4 +12,60 @@ databaseChangeLog:
                   autoIncrement: true
                   constraints:
                     primaryKey: true
-                    primaryKeyName: pk_hotel_id
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: VARCHAR(255)
+              - column:
+                  name: brand
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: address_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: contact_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: arrival_time_id
+                  type: BIGINT
+        - addForeignKeyConstraint:
+            baseTableName: hotels
+            baseColumnNames: address_id
+            referencedTableName: addresses
+            referencedColumnNames: id
+            constraintName: fk_hotels_address
+        - addForeignKeyConstraint:
+            baseTableName: hotels
+            baseColumnNames: contact_id
+            referencedTableName: contacts
+            referencedColumnNames: id
+            constraintName: fk_hotels_contact
+        - addForeignKeyConstraint:
+            baseTableName: hotels
+            baseColumnNames: arrival_time_id
+            referencedTableName: arrival_times
+            referencedColumnNames: id
+            constraintName: fk_hotels_arrival_time
+        - addUniqueConstraint:
+            tableName: hotels
+            columnNames: address_id
+            constraintName: uk_hotels_address
+        - addUniqueConstraint:
+            tableName: hotels
+            columnNames: contact_id
+            constraintName: uk_hotels_contact
+        - addUniqueConstraint:
+            tableName: hotels
+            columnNames: arrival_time_id
+            constraintName: uk_hotels_arrival_time
