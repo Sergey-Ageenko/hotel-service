@@ -1,0 +1,101 @@
+package by.ageenko.hotel.service.advice;
+
+import by.ageenko.hotel.service.exception.DataExistException;
+import by.ageenko.hotel.service.exception.InvalidDataException;
+import by.ageenko.hotel.service.exception.NotFoundException;
+import by.ageenko.hotel.service.model.constant.ApiErrorMessage;
+import by.ageenko.hotel.service.utils.ApiError;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+
+@Slf4j
+@RestControllerAdvice
+public class CommonControllerAdvice {
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiError> handleException(Exception ex, HttpServletRequest request) {
+        log.warn("Unexpected error", ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ApiError(
+                        500,
+                        "INTERNAL_SERVER_ERROR",
+                        ex.getMessage(),
+                        request.getRequestURI(),
+                        LocalDateTime.now(),
+                        null
+                ));
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ApiError> handleNotFoundException(NotFoundException ex, HttpServletRequest request) {
+        log.warn("NotFound: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ApiError(
+                        404,
+                        "NOT_FOUND",
+                        ex.getMessage(),
+                        request.getRequestURI(),
+                        LocalDateTime.now(),
+                        null
+                ));
+    }
+
+    @ExceptionHandler(DataExistException.class)
+    public ResponseEntity<ApiError> handleDataExistException(DataExistException ex, HttpServletRequest request) {
+        log.warn("Conflict: {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(new ApiError(
+                        409,
+                        "CONFLICT",
+                        ex.getMessage(),
+                        request.getRequestURI(),
+                        LocalDateTime.now(),
+                        null
+                ));
+    }
+
+    @ExceptionHandler(InvalidDataException.class)
+    public ResponseEntity<ApiError> handleInvalidDataException(InvalidDataException ex, HttpServletRequest request) {
+        log.warn("Bad request: {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ApiError(
+                        400,
+                        "BAD_REQUEST",
+                        ex.getMessage(),
+                        request.getRequestURI(),
+                        LocalDateTime.now(),
+                        null
+                ));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiError> handleMethodArgumentException(MethodArgumentNotValidException ex, HttpServletRequest request) {
+        log.warn("Validation failed: {}", ex.getMessage());
+        Map<String, String> errors = new HashMap<>();
+        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+            errors.put(error.getField(), error.getDefaultMessage());
+        }
+        ApiError apiError = new ApiError(
+                400,
+                "BAD_REQUEST",
+                ApiErrorMessage.VALIDATION_FAILED.getMessage(),
+                request.getRequestURI(),
+                LocalDateTime.now(),
+                errors
+        );
+        return ResponseEntity.badRequest()
+                .body(apiError);
+    }
+}

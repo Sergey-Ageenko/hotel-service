@@ -1,5 +1,15 @@
+server:
+  port: 8092
+  servlet:
+    context-path: /property-view
+
 spring:
   application:
     name: hotel-backend
-server:
-  port: 8092
+  profiles:
+    active: h2
+
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+
+

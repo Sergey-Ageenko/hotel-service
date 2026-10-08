@@ -9,3 +9,5 @@ databaseChangeLog:
       file: db/changelog/migrations/v.1.0.0/createHotels.yaml
   - include:
       file: db/changelog/migrations/v.1.0.0/createAmenities.yaml
+  - include:
+      file: db/changelog/migrations/v.1.0.0/insertTestData.yaml
