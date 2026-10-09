@@ -5,7 +5,6 @@ import by.ageenko.hotel.service.model.dto.response.HotelFullResponse;
 import by.ageenko.hotel.service.model.dto.response.HotelShortResponse;
 import by.ageenko.hotel.service.service.HotelService;
 import by.ageenko.hotel.service.utils.ApiError;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
