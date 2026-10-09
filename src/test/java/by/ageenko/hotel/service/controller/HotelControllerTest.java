@@ -2,6 +2,7 @@ package by.ageenko.hotel.service.controller;
 
 import by.ageenko.hotel.service.exception.InvalidDataException;
 import by.ageenko.hotel.service.exception.NotFoundException;
+import by.ageenko.hotel.service.model.constant.ApiErrorMessage;
 import by.ageenko.hotel.service.model.dto.AddressDto;
 import by.ageenko.hotel.service.model.dto.ArrivalTimeDto;
 import by.ageenko.hotel.service.model.dto.ContactDto;
@@ -77,25 +78,21 @@ class HotelControllerTest {
     @Test
     void getHotels_shouldReturnHotelsList() throws Exception {
         when(hotelService.getAll()).thenReturn(List.of(shortResponse()));
-
         mockMvc.perform(get("/hotels"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].id").value(1))
                 .andExpect(jsonPath("$[0].name").value("Test Hotel"));
-
         verify(hotelService).getAll();
     }
 
     @Test
     void getHotels_shouldReturnEmptyList_whenNoHotelsExist() throws Exception {
         when(hotelService.getAll()).thenReturn(List.of());
-
         mockMvc.perform(get("/hotels"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(0));
-
         verify(hotelService).getAll();
     }
 
@@ -103,7 +100,6 @@ class HotelControllerTest {
     @Test
     void getHotelById_shouldReturnHotel_whenExists() throws Exception {
         when(hotelService.getHotelById(1L)).thenReturn(fullResponse());
-
         mockMvc.perform(get("/hotels/{id}", 1L))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
@@ -112,19 +108,17 @@ class HotelControllerTest {
                 .andExpect(jsonPath("$.address.city").value("Minsk"))
                 .andExpect(jsonPath("$.contacts.phone").value("+375 (29) 123-45-67"))
                 .andExpect(jsonPath("$.amenities[0]").value("Free WiFi"));
-
         verify(hotelService).getHotelById(1L);
     }
 
     @Test
     void getHotelById_shouldReturnNotFound_whenHotelDoesNotExist() throws Exception {
-        when(hotelService.getHotelById(999L))
-                .thenThrow(new NotFoundException("Hotel not found"));
-
-        mockMvc.perform(get("/hotels/{id}", 999L))
+        Long id = 999L;
+        when(hotelService.getHotelById(id))
+                .thenThrow(new NotFoundException(ApiErrorMessage.HOTEL_NOT_FOUND_BY_ID.getMessage(id)));
+        mockMvc.perform(get("/hotels/{id}", id))
                 .andExpect(status().isNotFound());
-
-        verify(hotelService).getHotelById(999L);
+        verify(hotelService).getHotelById(id);
     }
 
     @Test
@@ -136,14 +130,12 @@ class HotelControllerTest {
                 null,
                 null
         )).thenReturn(List.of(shortResponse()));
-
         mockMvc.perform(get("/search")
                         .param("name", "Test brand")
                         .param("city", "Minsk"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].name").value("Test Hotel"));
-
         verify(hotelService).getAllByParam(
                 "Test brand", null, "Minsk", null, null
         );
@@ -154,12 +146,10 @@ class HotelControllerTest {
         when(hotelService.getAllByParam(
                 null, null, null, null, List.of("Free WiFi", "Gym")
         )).thenReturn(List.of(shortResponse()));
-
         mockMvc.perform(get("/search")
                         .param("amenities", "Free WiFi", "Gym"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1));
-
         verify(hotelService).getAllByParam(
                 null, null, null, null, List.of("Free WiFi", "Gym")
         );
@@ -168,16 +158,13 @@ class HotelControllerTest {
     @Test
     void createHotel_shouldReturnCreatedHotel() throws Exception {
         CreateHotelRequest request = createRequest();
-
         when(hotelService.createHotel(request)).thenReturn(shortResponse());
-
         mockMvc.perform(post("/hotels")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("Test Hotel"));
-
         verify(hotelService).createHotel(request);
     }
 
@@ -202,7 +189,6 @@ class HotelControllerTest {
                   "amenities": []
                 }
                 """;
-
         mockMvc.perform(post("/hotels")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
@@ -212,53 +198,44 @@ class HotelControllerTest {
     @Test
     void addAmenitiesToHotel_shouldReturnSuccess() throws Exception {
         List<String> amenities = List.of("Free WiFi", "Gym");
-
         mockMvc.perform(post("/hotels/{id}/amenities", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(amenities)))
                 .andExpect(status().isNoContent())
                 .andExpect(content().string(""));
-
         verify(hotelService).addAmenitiesToHotel(1L, amenities);
     }
 
     @Test
     void addAmenitiesToHotel_shouldReturnNotFound_whenHotelDoesNotExist() throws Exception {
+        Long hotelId = 999L;
         List<String> amenities = List.of("Free WiFi");
-
-        org.mockito.Mockito.doThrow(new NotFoundException("Hotel not found"))
-                .when(hotelService).addAmenitiesToHotel(999L, amenities);
-
-        mockMvc.perform(post("/hotels/{id}/amenities", 999L)
+        org.mockito.Mockito.doThrow(new NotFoundException(ApiErrorMessage.HOTEL_NOT_FOUND_BY_ID.getMessage(hotelId)))
+                .when(hotelService).addAmenitiesToHotel(hotelId, amenities);
+        mockMvc.perform(post("/hotels/{id}/amenities", hotelId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(amenities)))
                 .andExpect(status().isNotFound());
-
-        verify(hotelService).addAmenitiesToHotel(999L, amenities);
+        verify(hotelService).addAmenitiesToHotel(hotelId, amenities);
     }
 
     @Test
     void getHistogram_shouldReturnBrandCounts() throws Exception {
         when(hotelService.getHistogram("brand"))
                 .thenReturn(Map.of("Test brand", 3L, "Hilton", 2L));
-
         mockMvc.perform(get("/histogram/{param}", "brand"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$['Test brand']").value(3))
                 .andExpect(jsonPath("$.Hilton").value(2));
-
         verify(hotelService).getHistogram("brand");
     }
 
     @Test
-    void getHistogram_shouldReturnBadRequest_whenParameterUnsupported()
-            throws Exception {
+    void getHistogram_shouldReturnBadRequest_whenParameterUnsupported() throws Exception {
         when(hotelService.getHistogram("invalid"))
                 .thenThrow(new InvalidDataException("Unsupported histogram parameter"));
-
         mockMvc.perform(get("/histogram/{param}", "invalid"))
                 .andExpect(status().isBadRequest());
-
         verify(hotelService).getHistogram("invalid");
     }
 }

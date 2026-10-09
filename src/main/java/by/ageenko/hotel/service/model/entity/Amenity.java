@@ -18,8 +18,4 @@ public class Amenity {
 
     @Column(nullable = false)
     private String name;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "hotel_id", nullable = false)
-    private Hotel hotel;
 }

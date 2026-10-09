@@ -69,7 +69,7 @@ public class HotelServiceImpl implements HotelService {
 
     @Override
     @Transactional
-    public HotelShortResponse createHotel(CreateHotelRequest request) {
+    public HotelShortResponse createHotel(@NotNull CreateHotelRequest request) {
         if (hotelRepository.existsByName(request.name())) {
             throw new DataExistException(ApiErrorMessage.HOTEL_WITH_NAME_ALREADY_EXIST.getMessage(request.name()));
         }
@@ -80,21 +80,22 @@ public class HotelServiceImpl implements HotelService {
 
     @Override
     @Transactional
-    public void addAmenitiesToHotel(Long id, List<String> amenities) {
+    public void addAmenitiesToHotel(@NotNull Long id, @NotNull List<String> amenities) {
         Hotel hotel = hotelRepository.findByIdWithAmenities(id)
-                .orElseThrow(() -> new NotFoundException(ApiErrorMessage.HOTEL_NOT_FOUND_BY_ID.getMessage(id)));
+                .orElseThrow(() -> new NotFoundException(
+                        ApiErrorMessage.HOTEL_NOT_FOUND_BY_ID.getMessage(id)));
         Set<String> existingNames = hotel.getAmenities().stream()
                 .map(Amenity::getName)
                 .map(String::toLowerCase)
                 .collect(Collectors.toSet());
         amenities.stream()
                 .filter(name -> existingNames.add(name.toLowerCase()))
-                .map(name -> amenityMapper.toAmenity(name, hotel))
+                .map(amenityMapper::toAmenity)
                 .forEach(hotel.getAmenities()::add);
     }
 
     @Override
-    public Map<String, Long> getHistogram(String param) {
+    public Map<String, Long> getHistogram(@NotNull String param) {
         List<HistogramProjection> result = switch (param.toLowerCase()) {
             case "brand" -> hotelRepository.countGroupByBrand();
             case "city" -> hotelRepository.countGroupByCity();

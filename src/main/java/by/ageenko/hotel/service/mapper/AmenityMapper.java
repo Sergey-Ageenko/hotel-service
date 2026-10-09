@@ -9,7 +9,5 @@ import org.mapstruct.Mapping;
 public interface AmenityMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "name", source = "name")
-    @Mapping(target = "hotel", source = "hotel")
-    Amenity toAmenity(String name, Hotel hotel);
+    Amenity toAmenity(String name);
 }

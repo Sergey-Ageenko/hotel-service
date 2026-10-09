@@ -39,7 +39,8 @@ public class Hotel {
     @JoinColumn(name = "arrival_time_id")
     private ArrivalTime arrivalTime;
 
-    @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "hotel_id", nullable = false)
     @Builder.Default
     private List<Amenity> amenities = new ArrayList<>();
 }

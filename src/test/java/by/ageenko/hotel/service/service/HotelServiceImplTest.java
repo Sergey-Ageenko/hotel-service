@@ -59,12 +59,10 @@ public class HotelServiceImplTest {
     @Test
     void getHotelById_shouldReturnHotel_whenHotelExists() {
         Long id = 1L;
-
         Hotel hotel = Hotel.builder()
                 .id(id)
                 .name("Test Hotel")
                 .build();
-
         HotelFullResponse expectedResponse = new HotelFullResponse(
                 id,
                 "Test Hotel",
@@ -75,17 +73,12 @@ public class HotelServiceImplTest {
                 null,
                 List.of("Free WiFi")
         );
-
         when(hotelRepository.findByIdWithDetails(id))
                 .thenReturn(Optional.of(hotel));
-
         when(hotelMapper.toFullResponse(hotel))
                 .thenReturn(expectedResponse);
-
         HotelFullResponse result = hotelService.getHotelById(id);
-
         assertThat(result).isEqualTo(expectedResponse);
-
         verify(hotelRepository).findByIdWithDetails(id);
         verify(hotelMapper).toFullResponse(hotel);
     }
@@ -93,14 +86,11 @@ public class HotelServiceImplTest {
     @Test
     void getHotelById_shouldThrowException_whenHotelNotFound() {
         Long id = 999L;
-
         when(hotelRepository.findByIdWithDetails(id))
                 .thenReturn(Optional.empty());
-
         assertThatThrownBy(() -> hotelService.getHotelById(id))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage(ApiErrorMessage.HOTEL_NOT_FOUND_BY_ID.getMessage(id));
-
         verify(hotelRepository).findByIdWithDetails(id);
         verifyNoInteractions(hotelMapper);
     }
@@ -117,17 +107,13 @@ public class HotelServiceImplTest {
         );
 
         Long id = 1L;
-
         Hotel hotel = Hotel.builder()
                 .name(request.name())
                 .build();
-
         Hotel savedHotel = Hotel.builder()
                 .id(id)
                 .name(request.name())
                 .build();
-
-
         HotelShortResponse expectedResponse = new HotelShortResponse(
                 id,
                 "Test Hotel",
@@ -135,16 +121,12 @@ public class HotelServiceImplTest {
                 "10 Main Street, Minsk, 220000, Belarus",
                 "+375 (29) 123-45-67"
         );
-
         when(hotelRepository.existsByName(request.name())).thenReturn(false);
         when(hotelMapper.toHotel(request)).thenReturn(hotel);
         when(hotelRepository.save(hotel)).thenReturn(savedHotel);
         when(hotelMapper.toShortResponse(savedHotel)).thenReturn(expectedResponse);
-
         HotelShortResponse result = hotelService.createHotel(request);
-
         assertThat(result).isEqualTo(expectedResponse);
-
         verify(hotelRepository).existsByName(request.name());
         verify(hotelMapper).toHotel(request);
         verify(hotelRepository).save(hotel);
@@ -161,13 +143,11 @@ public class HotelServiceImplTest {
                 new ContactDto("+375 (29) 123-45-67", "test@example.com"),
                 new ArrivalTimeDto(LocalTime.of(14, 0), LocalTime.of(12, 0))
         );
-
         when(hotelRepository.existsByName(request.name()))
                 .thenReturn(true);
         assertThatThrownBy(() -> hotelService.createHotel(request))
                 .isInstanceOf(DataExistException.class)
                 .hasMessage(ApiErrorMessage.HOTEL_WITH_NAME_ALREADY_EXIST.getMessage(request.name()));
-
         verify(hotelRepository).existsByName(request.name());
         verifyNoInteractions(hotelMapper);
         verify(hotelRepository, never()).save(any(Hotel.class));
@@ -177,35 +157,26 @@ public class HotelServiceImplTest {
     void getAll_shouldReturnHotelsList() {
         Long id1 = 1L;
         Long id2 = 2L;
-
         Hotel hotel1 = Hotel.builder()
                 .id(id1)
                 .name("Test Hotel 1")
                 .build();
-
         Hotel hotel2 = Hotel.builder()
                 .id(id2)
                 .name("Test Hotel 2")
                 .build();
-
         List<HotelShortResponse> expectedResponse = List.of(
                 new HotelShortResponse(id1,"Test Hotel 1", "Description", "10, Main Street, Minsk, Belarus, 220000", "+375 (29) 123-45-67"),
                 new HotelShortResponse(id2,"Test Hotel 2", "Description", "10, Main Street, Minsk, Belarus, 220000", "+375 (29) 123-45-67")
         );
-
         when(hotelRepository.findAll())
                 .thenReturn(List.of(hotel1,hotel2));
-
         when(hotelMapper.toShortResponse(hotel1))
                 .thenReturn(expectedResponse.get(0));
-
         when(hotelMapper.toShortResponse(hotel2))
                 .thenReturn(expectedResponse.get(1));
-
         List<HotelShortResponse> result = hotelService.getAll();
-
         assertThat(result).isEqualTo(expectedResponse);
-
         verify(hotelMapper).toShortResponse(hotel1);
         verify(hotelMapper).toShortResponse(hotel2);
         verify(hotelRepository).findAll();
@@ -218,13 +189,11 @@ public class HotelServiceImplTest {
         String city = "Minsk";
         String country = "Belarus";
         List<String> amenities = List.of("Free WiFi");
-
         Long id = 1L;
         Hotel hotel = Hotel.builder()
                 .id(id)
                 .name("Test Hotel")
                 .build();
-
         HotelShortResponse expectedResponse = new HotelShortResponse(
                 id,
                 "Test Hotel",
@@ -232,22 +201,15 @@ public class HotelServiceImplTest {
                 "10 Main Street, Minsk, 220000, Belarus",
                 "+375 (29) 123-45-67"
         );
-
         Specification<Hotel> specification = Specification.unrestricted();
-
         when(hotelSpecification.hotelSearchSpecification(name, brand, city, country, amenities))
                 .thenReturn(specification);
-
         when(hotelRepository.findAll(specification))
                 .thenReturn(List.of(hotel));
-
         when(hotelMapper.toShortResponse(hotel))
                 .thenReturn(expectedResponse);
-
         List<HotelShortResponse> result = hotelService.getAllByParam(name, brand, city, country, amenities);
-
         assertThat(result).containsExactly(expectedResponse);
-
         verify(hotelSpecification).hotelSearchSpecification(name, brand, city, country, amenities);
         verify(hotelRepository).findAll(specification);
         verify(hotelMapper).toShortResponse(hotel);
@@ -257,56 +219,40 @@ public class HotelServiceImplTest {
     void addAmenitiesToHotel_shouldAddOnlyNewAmenities() {
         Long hotelId = 1L;
         Long amenityId = 1L;
-
         Amenity existingAmenity = Amenity.builder()
                 .id(amenityId)
                 .name("Free WiFi")
                 .build();
-
         Hotel hotel = Hotel.builder()
                 .id(hotelId)
                 .name("Test Hotel")
                 .amenities(new ArrayList<>(List.of(existingAmenity)))
                 .build();
-
-        existingAmenity.setHotel(hotel);
-
         List<String> requestedAmenities = List.of(
                 "Free WiFi",
                 "Swimming Pool",
                 "Swimming Pool",
                 "Gym"
         );
-
         Amenity swimmingPool = Amenity.builder()
                 .name("Swimming Pool")
-                .hotel(hotel)
                 .build();
-
         Amenity gym = Amenity.builder()
                 .name("Gym")
-                .hotel(hotel)
                 .build();
-
         when(hotelRepository.findByIdWithAmenities(hotelId))
                 .thenReturn(Optional.of(hotel));
-
-        when(amenityMapper.toAmenity("Swimming Pool", hotel))
+        when(amenityMapper.toAmenity("Swimming Pool"))
                 .thenReturn(swimmingPool);
-
-        when(amenityMapper.toAmenity("Gym", hotel))
+        when(amenityMapper.toAmenity("Gym"))
                 .thenReturn(gym);
-
         hotelService.addAmenitiesToHotel(hotelId, requestedAmenities);
-
         assertThat(hotel.getAmenities())
                 .extracting(Amenity::getName)
                 .containsExactly("Free WiFi", "Swimming Pool", "Gym");
-
         verify(hotelRepository).findByIdWithAmenities(hotelId);
-        verify(amenityMapper).toAmenity("Swimming Pool", hotel);
-        verify(amenityMapper).toAmenity("Gym", hotel);
-
+        verify(amenityMapper).toAmenity("Swimming Pool");
+        verify(amenityMapper).toAmenity("Gym");
         verifyNoInteractions(amenityRepository);
     }
 
@@ -314,23 +260,21 @@ public class HotelServiceImplTest {
     void getHistogram_shouldReturnCounts() {
         HistogramProjection marriott = mock(HistogramProjection.class);
         HistogramProjection hilton = mock(HistogramProjection.class);
-
-        when(marriott.getKey()).thenReturn("Marriott");
-        when(marriott.getCount()).thenReturn(3L);
-
-        when(hilton.getKey()).thenReturn("Hilton");
-        when(hilton.getCount()).thenReturn(2L);
-
+        when(marriott.getKey())
+                .thenReturn("Marriott");
+        when(marriott.getCount())
+                .thenReturn(3L);
+        when(hilton.getKey())
+                .thenReturn("Hilton");
+        when(hilton.getCount())
+                .thenReturn(2L);
         when(hotelRepository.countGroupByBrand())
                 .thenReturn(List.of(marriott, hilton));
-
         Map<String, Long> result = hotelService.getHistogram("brand");
-
         assertThat(result)
                 .containsEntry("Marriott", 3L)
                 .containsEntry("Hilton", 2L)
                 .hasSize(2);
-
         verify(hotelRepository).countGroupByBrand();
         verifyNoInteractions(amenityRepository);
     }
@@ -338,13 +282,9 @@ public class HotelServiceImplTest {
     @Test
     void getHistogram_shouldThrowException_whenParameterUnsupported() {
         String param = "invalid";
-
         assertThatThrownBy(() -> hotelService.getHistogram(param))
                 .isInstanceOf(InvalidDataException.class)
-                .hasMessage(
-                        ApiErrorMessage.UNSUPPORTED_HISTOGRAM_PARAMETER.getMessage(param)
-                );
-
+                .hasMessage(ApiErrorMessage.UNSUPPORTED_HISTOGRAM_PARAMETER.getMessage(param));
         verifyNoInteractions(hotelRepository);
         verifyNoInteractions(amenityRepository);
     }
