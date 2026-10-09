@@ -28,17 +28,16 @@ public interface HotelMapper {
     Hotel toHotel(CreateHotelRequest request);
 
     default String addressToString(Address address) {
-        if (address == null) return null;
-        return String.format("%s %s, %s, %s, %s",
+        return address == null ? null : String.format("%s %s, %s, %s, %s",
                 address.getHouseNumber(), address.getStreet(),
                 address.getCity(), address.getPostCode(), address.getCountry());
     }
 
-
     default List<String> amenitiesToStringList(List<Amenity> amenities) {
-        return amenities.stream()
+        return amenities == null ? List.of() : amenities.stream()
                 .map(Amenity::getName)
                 .toList();
+
     }
 
 }

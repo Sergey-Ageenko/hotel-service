@@ -9,7 +9,13 @@ spring:
   profiles:
     active: h2
 
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
+    enabled: true
+
 
 
