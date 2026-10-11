@@ -95,6 +95,7 @@ public class HotelServiceImpl implements HotelService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Map<String, Long> getHistogram(@NotNull String param) {
         List<HistogramProjection> result = switch (param.toLowerCase()) {
             case "brand" -> hotelRepository.countGroupByBrand();
