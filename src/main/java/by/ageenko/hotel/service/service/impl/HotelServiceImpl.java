@@ -1,5 +1,8 @@
 package by.ageenko.hotel.service.service.impl;
 
+import by.ageenko.dto.CreateHotelRequest;
+import by.ageenko.dto.HotelFullResponse;
+import by.ageenko.dto.HotelShortResponse;
 import by.ageenko.hotel.service.exception.DataExistException;
 import by.ageenko.hotel.service.exception.InvalidDataException;
 import by.ageenko.hotel.service.exception.NotFoundException;
@@ -7,9 +10,6 @@ import by.ageenko.hotel.service.mapper.AmenityMapper;
 import by.ageenko.hotel.service.mapper.HotelMapper;
 import by.ageenko.hotel.service.model.constant.ApiErrorMessage;
 import by.ageenko.hotel.service.model.dto.HistogramProjection;
-import by.ageenko.hotel.service.model.dto.request.CreateHotelRequest;
-import by.ageenko.hotel.service.model.dto.response.HotelFullResponse;
-import by.ageenko.hotel.service.model.dto.response.HotelShortResponse;
 import by.ageenko.hotel.service.model.entity.Amenity;
 import by.ageenko.hotel.service.model.entity.Hotel;
 import by.ageenko.hotel.service.repository.AmenityRepository;
@@ -70,8 +70,8 @@ public class HotelServiceImpl implements HotelService {
     @Override
     @Transactional
     public HotelShortResponse createHotel(@NotNull CreateHotelRequest request) {
-        if (hotelRepository.existsByName(request.name())) {
-            throw new DataExistException(ApiErrorMessage.HOTEL_WITH_NAME_ALREADY_EXIST.getMessage(request.name()));
+        if (hotelRepository.existsByName(request.getName())) {
+            throw new DataExistException(ApiErrorMessage.HOTEL_WITH_NAME_ALREADY_EXIST.getMessage(request.getName()));
         }
         Hotel hotel = hotelMapper.toHotel(request);
         return hotelMapper
@@ -96,7 +96,7 @@ public class HotelServiceImpl implements HotelService {
 
     @Override
     @Transactional(readOnly = true)
-    public Map<String, Long> getHistogram(@NotNull String param) {
+    public Map<String, Integer> getHistogram(@NotNull String param) {
         List<HistogramProjection> result = switch (param.toLowerCase()) {
             case "brand" -> hotelRepository.countGroupByBrand();
             case "city" -> hotelRepository.countGroupByCity();

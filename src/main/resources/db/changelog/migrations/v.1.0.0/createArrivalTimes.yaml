@@ -15,7 +15,7 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: check_in
-                  type: TIME
+                  type: VARCHAR(255)
               - column:
                   name: check_out
-                  type: TIME
+                  type: VARCHAR(255)

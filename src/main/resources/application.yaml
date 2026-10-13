@@ -6,6 +6,7 @@ server:
 spring:
   application:
     name: hotel-backend
+
   profiles:
     active: h2
 
@@ -17,5 +18,11 @@ spring:
     change-log: classpath:db/changelog/db.changelog-master.yaml
     enabled: true
 
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: alpha
 
 

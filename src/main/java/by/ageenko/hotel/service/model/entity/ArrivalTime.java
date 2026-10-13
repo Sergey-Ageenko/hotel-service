@@ -3,8 +3,6 @@ package by.ageenko.hotel.service.model.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalTime;
-
 @Entity
 @Table(name = "arrival_times")
 @Builder
@@ -19,8 +17,8 @@ public class ArrivalTime {
     private Long id;
 
     @Column(name = "check_in")
-    private LocalTime checkIn;
+    private String checkIn;
 
     @Column(name = "check_out")
-    private LocalTime checkOut;
+    private String checkOut;
 }

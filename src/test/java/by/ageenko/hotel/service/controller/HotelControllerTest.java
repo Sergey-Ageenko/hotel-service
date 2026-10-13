@@ -1,14 +1,9 @@
 package by.ageenko.hotel.service.controller;
 
+import by.ageenko.dto.*;
 import by.ageenko.hotel.service.exception.InvalidDataException;
 import by.ageenko.hotel.service.exception.NotFoundException;
 import by.ageenko.hotel.service.model.constant.ApiErrorMessage;
-import by.ageenko.hotel.service.model.dto.AddressDto;
-import by.ageenko.hotel.service.model.dto.ArrivalTimeDto;
-import by.ageenko.hotel.service.model.dto.ContactDto;
-import by.ageenko.hotel.service.model.dto.request.CreateHotelRequest;
-import by.ageenko.hotel.service.model.dto.response.HotelFullResponse;
-import by.ageenko.hotel.service.model.dto.response.HotelShortResponse;
 import by.ageenko.hotel.service.service.HotelService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +13,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 
@@ -57,8 +51,8 @@ class HotelControllerTest {
                 "Description",
                 "Test brand",
                 new AddressDto(10, "Main Street", "Minsk", "Belarus", "220000"),
-                new ContactDto("+375 (29) 123-45-67", "test@example.com"),
-                new ArrivalTimeDto(LocalTime.of(14, 0), LocalTime.of(12, 0)),
+                new ContactsDto("+375 (29) 123-45-67", "test@example.com"),
+                new ArrivalTimeDto("14:00"),
                 List.of("Free WiFi", "Gym")
         );
     }
@@ -66,11 +60,10 @@ class HotelControllerTest {
     private CreateHotelRequest createRequest() {
         return new CreateHotelRequest(
                 "Test Hotel",
-                "Description",
                 "Test brand",
                 new AddressDto(10, "Main Street", "Minsk", "Belarus", "220000"),
-                new ContactDto("+375 (29) 123-45-67", "test@example.com"),
-                new ArrivalTimeDto(LocalTime.of(14, 0), LocalTime.of(12, 0))
+                new ContactsDto("+375 (29) 123-45-67", "test@example.com"),
+                new ArrivalTimeDto("14:00")
         );
     }
 
@@ -201,7 +194,7 @@ class HotelControllerTest {
         mockMvc.perform(post("/hotels/{id}/amenities", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(amenities)))
-                .andExpect(status().isNoContent())
+                .andExpect(status().isCreated())
                 .andExpect(content().string(""));
         verify(hotelService).addAmenitiesToHotel(1L, amenities);
     }
@@ -222,7 +215,7 @@ class HotelControllerTest {
     @Test
     void getHistogram_shouldReturnBrandCounts() throws Exception {
         when(hotelService.getHistogram("brand"))
-                .thenReturn(Map.of("Test brand", 3L, "Hilton", 2L));
+                .thenReturn(Map.of("Test brand", 3, "Hilton", 2));
         mockMvc.perform(get("/histogram/{param}", "brand"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$['Test brand']").value(3))

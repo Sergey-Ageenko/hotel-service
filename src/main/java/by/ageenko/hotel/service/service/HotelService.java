@@ -1,8 +1,8 @@
 package by.ageenko.hotel.service.service;
 
-import by.ageenko.hotel.service.model.dto.request.CreateHotelRequest;
-import by.ageenko.hotel.service.model.dto.response.HotelFullResponse;
-import by.ageenko.hotel.service.model.dto.response.HotelShortResponse;
+import by.ageenko.dto.CreateHotelRequest;
+import by.ageenko.dto.HotelFullResponse;
+import by.ageenko.dto.HotelShortResponse;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 
@@ -25,5 +25,5 @@ public interface HotelService {
     void addAmenitiesToHotel(@NotNull Long id,
                              @NotNull List<String> amenities);
 
-    Map<String, Long> getHistogram(@NotNull String param);
+    Map<String, Integer> getHistogram(@NotNull String param);
 }

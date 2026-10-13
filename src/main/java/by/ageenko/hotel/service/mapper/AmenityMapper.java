@@ -4,9 +4,18 @@ import by.ageenko.hotel.service.model.entity.Amenity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface AmenityMapper {
 
     @Mapping(target = "id", ignore = true)
     Amenity toAmenity(String name);
+
+    default List<String> amenitiesToStringList(List<Amenity> amenities) {
+        return amenities == null ? List.of() : amenities.stream()
+                .map(Amenity::getName)
+                .toList();
+
+    }
 }

@@ -1,18 +1,13 @@
 package by.ageenko.hotel.service.service;
 
+import by.ageenko.dto.*;
 import by.ageenko.hotel.service.exception.DataExistException;
 import by.ageenko.hotel.service.exception.InvalidDataException;
 import by.ageenko.hotel.service.exception.NotFoundException;
 import by.ageenko.hotel.service.mapper.AmenityMapper;
 import by.ageenko.hotel.service.mapper.HotelMapper;
 import by.ageenko.hotel.service.model.constant.ApiErrorMessage;
-import by.ageenko.hotel.service.model.dto.AddressDto;
-import by.ageenko.hotel.service.model.dto.ArrivalTimeDto;
-import by.ageenko.hotel.service.model.dto.ContactDto;
 import by.ageenko.hotel.service.model.dto.HistogramProjection;
-import by.ageenko.hotel.service.model.dto.request.CreateHotelRequest;
-import by.ageenko.hotel.service.model.dto.response.HotelFullResponse;
-import by.ageenko.hotel.service.model.dto.response.HotelShortResponse;
 import by.ageenko.hotel.service.model.entity.Amenity;
 import by.ageenko.hotel.service.model.entity.Hotel;
 import by.ageenko.hotel.service.repository.AmenityRepository;
@@ -26,7 +21,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -99,20 +93,19 @@ public class HotelServiceImplTest {
     void createHotel_shouldReturnHotel_whenNameIsUnique() {
         CreateHotelRequest request = new CreateHotelRequest(
                 "Test Hotel",
-                "Description",
                 "Test Brand",
                 new AddressDto(10, "Main Street", "Minsk", "Belarus", "220000"),
-                new ContactDto("+375 (29) 123-45-67", "test@example.com"),
-                new ArrivalTimeDto(LocalTime.of(14, 0), LocalTime.of(12, 0))
+                new ContactsDto("+375 (29) 123-45-67", "test@example.com"),
+                new ArrivalTimeDto("14:00")
         );
 
         Long id = 1L;
         Hotel hotel = Hotel.builder()
-                .name(request.name())
+                .name(request.getName())
                 .build();
         Hotel savedHotel = Hotel.builder()
                 .id(id)
-                .name(request.name())
+                .name(request.getName())
                 .build();
         HotelShortResponse expectedResponse = new HotelShortResponse(
                 id,
@@ -121,13 +114,13 @@ public class HotelServiceImplTest {
                 "10 Main Street, Minsk, 220000, Belarus",
                 "+375 (29) 123-45-67"
         );
-        when(hotelRepository.existsByName(request.name())).thenReturn(false);
+        when(hotelRepository.existsByName(request.getName())).thenReturn(false);
         when(hotelMapper.toHotel(request)).thenReturn(hotel);
         when(hotelRepository.save(hotel)).thenReturn(savedHotel);
         when(hotelMapper.toShortResponse(savedHotel)).thenReturn(expectedResponse);
         HotelShortResponse result = hotelService.createHotel(request);
         assertThat(result).isEqualTo(expectedResponse);
-        verify(hotelRepository).existsByName(request.name());
+        verify(hotelRepository).existsByName(request.getName());
         verify(hotelMapper).toHotel(request);
         verify(hotelRepository).save(hotel);
         verify(hotelMapper).toShortResponse(savedHotel);
@@ -137,18 +130,17 @@ public class HotelServiceImplTest {
     void createHotel_shouldThrowException_whenHotelIsExist() {
         CreateHotelRequest request = new CreateHotelRequest(
                 "Test Hotel",
-                "Description",
                 "Test Brand",
                 new AddressDto(10, "Main Street", "Minsk", "Belarus", "220000"),
-                new ContactDto("+375 (29) 123-45-67", "test@example.com"),
-                new ArrivalTimeDto(LocalTime.of(14, 0), LocalTime.of(12, 0))
+                new ContactsDto("+375 (29) 123-45-67", "test@example.com"),
+                new ArrivalTimeDto("14:00")
         );
-        when(hotelRepository.existsByName(request.name()))
+        when(hotelRepository.existsByName(request.getName()))
                 .thenReturn(true);
         assertThatThrownBy(() -> hotelService.createHotel(request))
                 .isInstanceOf(DataExistException.class)
-                .hasMessage(ApiErrorMessage.HOTEL_WITH_NAME_ALREADY_EXIST.getMessage(request.name()));
-        verify(hotelRepository).existsByName(request.name());
+                .hasMessage(ApiErrorMessage.HOTEL_WITH_NAME_ALREADY_EXIST.getMessage(request.getName()));
+        verify(hotelRepository).existsByName(request.getName());
         verifyNoInteractions(hotelMapper);
         verify(hotelRepository, never()).save(any(Hotel.class));
     }
@@ -263,17 +255,17 @@ public class HotelServiceImplTest {
         when(marriott.getKey())
                 .thenReturn("Marriott");
         when(marriott.getCount())
-                .thenReturn(3L);
+                .thenReturn(3);
         when(hilton.getKey())
                 .thenReturn("Hilton");
         when(hilton.getCount())
-                .thenReturn(2L);
+                .thenReturn(2);
         when(hotelRepository.countGroupByBrand())
                 .thenReturn(List.of(marriott, hilton));
-        Map<String, Long> result = hotelService.getHistogram("brand");
+        Map<String, Integer> result = hotelService.getHistogram("brand");
         assertThat(result)
-                .containsEntry("Marriott", 3L)
-                .containsEntry("Hilton", 2L)
+                .containsEntry("Marriott", 3)
+                .containsEntry("Hilton", 2)
                 .hasSize(2);
         verify(hotelRepository).countGroupByBrand();
         verifyNoInteractions(amenityRepository);
